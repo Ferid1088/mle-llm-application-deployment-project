@@ -10,11 +10,11 @@ provider meets production latency or answer-quality objectives.
 
 | Case | Terms Passed | Cache Verified | Quality | Latency ms |
 |---|---:|---:|---:|---:|
-| refund_supported | True | True | 0.90 | 0.00 |
+| refund_supported | True | True | 0.90 | 0.01 |
 | account_access | True | True | 0.90 | 0.01 |
 | privacy_handoff | True | True | 0.90 | 0.01 |
 | incident_status | True | True | 0.90 | 0.01 |
-| unsupported_policy | True | True | 0.90 | 0.00 |
+| unsupported_policy | True | True | 0.90 | 0.01 |
 
 ## Service Health And LLM Signals
 
