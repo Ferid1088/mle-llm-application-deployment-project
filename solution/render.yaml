@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: northstar-llm-deployment-project
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./solution/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    numInstances: 1
+    autoDeployTrigger: commit
+    envVars:
+      - key: MODEL_PROVIDER
+        value: groq
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-20b
+      - key: GROQ_API_KEY
+        sync: false
+      - key: TRACE_SINK
+        value: langfuse
+      - key: LANGFUSE_TRACING_ENVIRONMENT
+        value: production
+      - key: LANGFUSE_RELEASE
+        value: main
+      - key: LANGFUSE_PUBLIC_KEY
+        sync: false
+      - key: LANGFUSE_SECRET_KEY
+        sync: false
+      - key: LANGFUSE_BASE_URL
+        value: https://cloud.langfuse.com
