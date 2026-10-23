@@ -1,7 +1,7 @@
 """Reference FastAPI application."""
 
-import logging
 import asyncio
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException

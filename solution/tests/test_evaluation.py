@@ -6,10 +6,10 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from solution.deployment_project.evaluation import (
+    evaluate_case,
     load_cases,
     render_report,
     run_evaluation,
-    evaluate_case,
 )
 from solution.deployment_project.models import EvaluationCase, GenerateResponse, Usage
 from solution.deployment_project.service import GenerationService

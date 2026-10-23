@@ -10,7 +10,7 @@ can be tested independently.
 1. [models.py](deployment_project/models.py) defines the service contracts.
 2. [provider.py](deployment_project/provider.py) supplies dry and Groq modes.
 3. [service.py](deployment_project/service.py) adds cache and concurrency;
-   [tracing.py](deployment_project/tracing.py) exports JSONL or Langfuse Python SDK v4
+   [tracing.py](deployment_project/tracing.py) exports JSONL or Langfuse Python SDK v5
    observations with usage, release, and quality evidence.
 4. [app.py](deployment_project/app.py) exposes the API.
 5. [evaluation.py](deployment_project/evaluation.py) evaluates every shared
@@ -68,7 +68,7 @@ cases; mean latency includes both the initial miss and subsequent hits.
 The checked-in Blueprint uses one paid starter instance and requests secrets
 from the Render dashboard. JSONL is the default trace sink so the full
 evaluation runs without credentials; set `TRACE_SINK=langfuse` to use the
-included Langfuse Python SDK v4 exporter. Document prompt/output masking before live
+included Langfuse Python SDK v5 exporter (Cloud or self-hosted Langfuse 4.59.0+). Document prompt/output masking before live
 traffic.
 
 The exporter omits raw text, records failures and avoids generation observations

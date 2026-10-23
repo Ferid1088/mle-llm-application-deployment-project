@@ -1,4 +1,4 @@
-"""JSONL and Langfuse Python SDK v4 trace exporters."""
+"""JSONL and Langfuse Python SDK v5 trace exporters."""
 
 from pathlib import Path
 from typing import Protocol
@@ -28,18 +28,19 @@ class LangfuseTraceSink:
         self.client = get_client()
 
     def record(self, trace: TraceRecord) -> None:
-        with propagate_attributes(
-            trace_name=trace.name,
-            version=trace.release,
-            environment=trace.environment,
-            tags=["deployment-project", trace.release],
-            metadata={
-                "trace_id": trace.trace_id,
-                "environment": trace.environment,
-                "cache_hit": str(trace.cache_hit).lower(),
-            },
-        ):
-            with self.client.start_as_current_observation(
+        with (
+            propagate_attributes(
+                trace_name=trace.name,
+                version=trace.release,
+                environment=trace.environment,
+                tags=["deployment-project", trace.release],
+                metadata={
+                    "trace_id": trace.trace_id,
+                    "environment": trace.environment,
+                    "cache_hit": str(trace.cache_hit).lower(),
+                },
+            ),
+            self.client.start_as_current_observation(
                 as_type="span",
                 name=trace.name,
                 input={"prompt_chars": len(trace.prompt)},
@@ -51,26 +52,27 @@ class LangfuseTraceSink:
                     "cache_hit": str(trace.cache_hit).lower(),
                     "request_latency_ms": trace.latency_ms,
                 },
-            ) as root:
-                if not trace.cache_hit:
-                    with self.client.start_as_current_observation(
-                        as_type="generation",
-                        name="llm-generation",
-                        model=trace.model,
-                        input={"prompt_chars": len(trace.prompt)},
-                        level="ERROR" if trace.status == "error" else "DEFAULT",
-                    ) as generation:
-                        generation.update(
-                            output={"output_chars": len(trace.output)},
-                            usage_details={
-                                "input": trace.usage.input_tokens,
-                                "output": trace.usage.output_tokens,
-                            },
-                        )
-                root.score(name="quality", value=trace.quality_score)
-                root.update(
-                    output={"status": trace.status, "output_chars": len(trace.output)}
-                )
+            ) as root,
+        ):
+            if not trace.cache_hit:
+                with self.client.start_as_current_observation(
+                    as_type="generation",
+                    name="llm-generation",
+                    model=trace.model,
+                    input={"prompt_chars": len(trace.prompt)},
+                    level="ERROR" if trace.status == "error" else "DEFAULT",
+                ) as generation:
+                    generation.update(
+                        output={"output_chars": len(trace.output)},
+                        usage_details={
+                            "input": trace.usage.input_tokens,
+                            "output": trace.usage.output_tokens,
+                        },
+                    )
+            root.score(name="quality", value=trace.quality_score)
+            root.update(
+                output={"status": trace.status, "output_chars": len(trace.output)}
+            )
 
     def flush(self) -> None:
         """Finish pending exports at process shutdown, not on every request."""
