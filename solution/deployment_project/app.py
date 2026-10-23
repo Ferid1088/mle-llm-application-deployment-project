@@ -1,8 +1,11 @@
 """Reference FastAPI application."""
 
 import logging
+import asyncio
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
+from openai import APITimeoutError
 
 from solution.deployment_project.config import settings
 from solution.deployment_project.models import GenerateRequest, GenerateResponse
@@ -11,8 +14,18 @@ from solution.deployment_project.service import GenerationService
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Northstar LLM Deployment Project")
 service = GenerationService(build_provider(settings), settings)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    yield
+    flush = getattr(service.trace_sink, "flush", None)
+    if callable(flush):
+        await asyncio.to_thread(flush)
+
+
+app = FastAPI(title="Northstar LLM Deployment Project", lifespan=lifespan)
 
 
 @app.get("/health")
@@ -29,6 +42,10 @@ def ready() -> dict[str, str]:
 async def generate(request: GenerateRequest) -> GenerateResponse:
     try:
         return await service.generate(request)
+    except (TimeoutError, APITimeoutError) as exc:
+        raise HTTPException(
+            status_code=504, detail="Generation request timed out"
+        ) from exc
     except Exception as exc:
         logger.exception("Generation provider failed")
         raise HTTPException(

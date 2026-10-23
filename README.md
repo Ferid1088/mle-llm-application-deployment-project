@@ -10,7 +10,16 @@ Langfuse units. The default evaluation is deterministic and requires no API
 keys; your deployed evidence should use a live provider when available and
 record the resulting operational trade-offs.
 
-## Project Hub
+## Learning Objectives
+
+By completing this project, you should be able to:
+
+- Build and deploy a complete LLM-powered application with an inference API,
+  containerization, hosted deployment, caching, and production observability.
+- Demonstrate and interpret both service-health metrics such as latency and
+  errors and LLM-specific metrics such as token usage, cost, and answer quality.
+
+## Learning Path
 
 - [project-description.md](project-description.md): Scenario, requirements,
   milestones, deliverables, and acceptance checklist.
@@ -20,7 +29,15 @@ record the resulting operational trade-offs.
   profile and service objectives used in the deployment report.
 - [solution/README.md](solution/README.md): Separate runnable reference
   implementation to inspect after attempting the project.
-- [assets/README.md](assets/README.md): visual assets and source credits.
+
+### Additional Folders and Files
+
+| File / Folder | Description |
+|---|---|
+| [**pyproject.toml**](pyproject.toml) | Project configuration and dependencies. |
+| [**uv.lock**](uv.lock) | Dependency lock file. |
+| [**.env.example**](.env.example) | Default settings and credential placeholders. |
+| [**Assets**](assets/README.md) | Visual sources and credits. |
 
 ## Required Workflow
 
@@ -67,28 +84,92 @@ Your repository must include:
 - `reports/deployment_report.md` comparing observed results with the supplied
   service objectives and listing prioritized improvements.
 
-## Environment
+## Setup
+
+> [!NOTE]
+> Throughout these steps, text in angle brackets like `<repo-name>` is a **placeholder**. Replace it, including the `< >` brackets, with your own value. For example, `cd <repo-name>` becomes `cd mle-llm-application-deployment-project`.
+
+### 1. Create the Repository from the Template
+
+Click **Use this template** on GitHub.
+
+When creating the repository:
+
+- Set yourself as the **Owner**
+- Choose a repository name
+- Disable **Include all branches**
+- Click **Create repository**
+
+> [!IMPORTANT]
+> If you are working in pairs or groups, only **one person** should complete this step.
+
+---
+
+### 2. Add Collaborators (Pairs/Groups Only)
+
+If working with teammates:
+
+1. Open the repository on GitHub
+2. Go to **Settings → Collaborators**
+3. Add your teammates as collaborators
+4. Share the repository link with your team
+
+Teammates should accept the invitation before continuing.
+
+---
+
+### 3. Clone the Repository
+
+Copy the SSH URL from the **Code** button on GitHub, then run:
 
 ```bash
+git clone <copied-ssh-url>
+```
+
+The copied SSH URL will look like `git@github.com:<your-username>/<repo-name>.git`.
+
+---
+
+### 4. Move into the Project Folder and Install Dependencies
+
+The command below installs all dependencies and creates a virtual environment in `.venv/`.
+
+```bash
+cd <repo-name>
 uv sync
+```
+
+Python 3.13 is selected by `.python-version`. Install [uv](https://docs.astral.sh/uv/getting-started/installation/) first if needed.
+
+---
+
+### 5. Set Up Environment Variables
+
+```bash
 cp .env.example .env
+```
+
+Keep the defaults for the first local run. Never commit `.env` or real credentials.
+
+---
+
+### 6. Open the Repository in VS Code
+
+```bash
+code .
+```
+
+Select the Python interpreter in `.venv/` and run commands from the repository root.
+
+## Run Locally
+
+```bash
 uv run python -m solution.deployment_project inspect-data
 uv run python -m solution.deployment_project evaluate
 uv run pytest
 ```
 
-The commands above use deterministic dry mode. Live provider and Langfuse
-credentials belong only in `.env` locally and in Render's secret configuration
-for deployment.
-
-## Learning Objectives
-
-By completing this project, you should be able to:
-
-- Build and deploy a complete LLM-powered application with an inference API,
-  containerization, hosted deployment, caching, and production observability.
-- Demonstrate and interpret both service-health metrics such as latency and
-  errors and LLM-specific metrics such as token usage, cost, and answer quality.
+These commands run the deterministic reference, not a live model. Try the project brief before inspecting the solution. Docker Desktop is required for the container exercise. Render deployment and live Groq calls can incur charges; credentials belong in `.env` or the hosting dashboard, never Git.
 
 ## Useful References
 
@@ -98,3 +179,10 @@ By completing this project, you should be able to:
 - [Langfuse scores](https://langfuse.com/docs/evaluation/scores/overview).
 - [FastAPI deployment concepts](https://fastapi.tiangolo.com/deployment/concepts/).
 - [Groq OpenAI compatibility](https://console.groq.com/docs/openai).
+
+## Mermaid Diagrams
+
+This repository contains Mermaid diagrams. If you want them to render in VS Code, we recommend installing the `Markdown Preview Mermaid Support` extension:
+
+- [Install in VS Code](vscode:extension/bierner.markdown-mermaid)
+- [View on Marketplace](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid)

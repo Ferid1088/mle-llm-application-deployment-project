@@ -92,8 +92,8 @@ clear deploy, revise, or stop recommendation tied to measured evidence.
 
 1. Which failure should make readiness fail, and which should affect only one
    generation request?
-2. What becomes incorrect when a process-local cache is scaled to several
-   instances?
+2. How do cache-hit rate, duplicate provider calls and memory usage change when
+   each service instance has its own process-local cache?
 3. Which trace fields require masking or restricted retention?
 4. What evidence distinguishes provider latency from application saturation?
 5. Which measured result most strongly supports your final recommendation?

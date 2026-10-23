@@ -1,9 +1,13 @@
 """API, provider, trace, and evaluation contracts."""
 
-from pydantic import BaseModel, Field
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class GenerateRequest(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
     prompt: str = Field(min_length=1, max_length=8000)
     max_tokens: int = Field(default=200, ge=1, le=2048)
     temperature: float = Field(default=0.2, ge=0, le=2)
@@ -40,7 +44,7 @@ class EvaluationCase(BaseModel):
 class CaseResult(BaseModel):
     case_id: str
     passed: bool
-    cache_verified: bool
+    cache_verified: bool | None
     quality_score: float
     latency_ms: float
 
@@ -57,4 +61,5 @@ class TraceRecord(BaseModel):
     quality_score: float
     release: str = "local"
     environment: str = "development"
-    spans: list[str] = Field(default_factory=lambda: ["cache-lookup", "llm-generation"])
+    status: Literal["ok", "error"] = "ok"
+    spans: list[str] = Field(default_factory=list)

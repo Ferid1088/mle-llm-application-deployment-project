@@ -47,7 +47,8 @@ class GroqProvider:
         self.client = AsyncOpenAI(
             api_key=settings.api_key,
             base_url="https://api.groq.com/openai/v1",
-            timeout=30,
+            timeout=settings.request_timeout_seconds,
+            max_retries=0,
         )
 
     async def generate(self, request: GenerateRequest) -> ProviderResult:
@@ -57,6 +58,11 @@ class GroqProvider:
             temperature=request.temperature,
             max_tokens=request.max_tokens,
         )
+        if (
+            not response.choices
+            or not (response.choices[0].message.content or "").strip()
+        ):
+            raise ValueError("Provider returned no answer")
         usage = response.usage
         return ProviderResult(
             text=response.choices[0].message.content or "",

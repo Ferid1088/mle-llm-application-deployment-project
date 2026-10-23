@@ -8,6 +8,11 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 COPY solution ./solution
 COPY data ./data
+RUN useradd --create-home appuser \
+    && mkdir -p solution/generated reports/generated \
+    && chown appuser:appuser solution/generated reports/generated
+USER appuser
 
 ENV PATH="/app/.venv/bin:$PATH"
-CMD ["uvicorn", "solution.deployment_project.app:app", "--host", "0.0.0.0", "--port", "8000"]
+EXPOSE 8000
+CMD ["uv", "run", "--no-sync", "uvicorn", "solution.deployment_project.app:app", "--host", "0.0.0.0", "--port", "8000"]

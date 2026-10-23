@@ -8,18 +8,23 @@ provider meets production latency or answer-quality objectives.
 
 ## Case Results
 
-| Case | Terms Passed | Cache Verified | Quality | Latency ms |
+| Case | Terms Passed | Cache Verified | Mean Quality | Mean Latency ms |
 |---|---:|---:|---:|---:|
-| refund_supported | True | True | 0.90 | 0.01 |
-| account_access | True | True | 0.90 | 0.01 |
-| privacy_handoff | True | True | 0.90 | 0.01 |
-| incident_status | True | True | 0.90 | 0.01 |
-| unsupported_policy | True | True | 0.90 | 0.01 |
+| refund_supported | True | True | 0.90 | 0.03 |
+| account_access | True | N/A | 0.90 | 0.02 |
+| privacy_handoff | True | N/A | 0.90 | 0.02 |
+| incident_status | True | N/A | 0.90 | 0.01 |
+| unsupported_policy | True | N/A | 0.90 | 0.01 |
+
+N/A means the case has no repeated request. Cache verification requires an
+initial miss followed by hits; mean latency includes every repeat, not just the
+last cached response. Neither these timings nor the keyword scores prove a live SLO.
 
 ## Service Health And LLM Signals
 
 - Health and readiness contracts are separate.
-- Every request writes cache, generation, usage, release, and quality evidence.
+- Traces distinguish cache hits from generation and count no new provider tokens on hits.
+- The quality score is a keyword heuristic, not a factuality or policy-compliance metric.
 - Dry latency is a smoke metric and must not be treated as live capacity.
 
 ## Required Next Experiments

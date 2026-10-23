@@ -1,4 +1,4 @@
-"""JSONL and Langfuse v4 trace exporters."""
+"""JSONL and Langfuse Python SDK v4 trace exporters."""
 
 from pathlib import Path
 from typing import Protocol
@@ -42,29 +42,38 @@ class LangfuseTraceSink:
             with self.client.start_as_current_observation(
                 as_type="span",
                 name=trace.name,
-                input={"prompt": trace.prompt},
+                input={"prompt_chars": len(trace.prompt)},
+                level="ERROR" if trace.status == "error" else "DEFAULT",
                 metadata={
                     "trace_id": trace.trace_id,
                     "release": trace.release,
                     "environment": trace.environment,
                     "cache_hit": str(trace.cache_hit).lower(),
+                    "request_latency_ms": trace.latency_ms,
                 },
             ) as root:
-                with self.client.start_as_current_observation(
-                    as_type="generation",
-                    name="llm-generation",
-                    model=trace.model,
-                    input=trace.prompt,
-                ) as generation:
-                    generation.update(
-                        output=trace.output,
-                        usage_details={
-                            "input": trace.usage.input_tokens,
-                            "output": trace.usage.output_tokens,
-                        },
-                    )
-                    generation.score(name="quality", value=trace.quality_score)
-            root.update(output={"answer": trace.output})
+                if not trace.cache_hit:
+                    with self.client.start_as_current_observation(
+                        as_type="generation",
+                        name="llm-generation",
+                        model=trace.model,
+                        input={"prompt_chars": len(trace.prompt)},
+                        level="ERROR" if trace.status == "error" else "DEFAULT",
+                    ) as generation:
+                        generation.update(
+                            output={"output_chars": len(trace.output)},
+                            usage_details={
+                                "input": trace.usage.input_tokens,
+                                "output": trace.usage.output_tokens,
+                            },
+                        )
+                root.score(name="quality", value=trace.quality_score)
+                root.update(
+                    output={"status": trace.status, "output_chars": len(trace.output)}
+                )
+
+    def flush(self) -> None:
+        """Finish pending exports at process shutdown, not on every request."""
         self.client.flush()
 
 
