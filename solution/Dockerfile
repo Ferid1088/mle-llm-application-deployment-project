@@ -1,11 +1,15 @@
-FROM python:3.13-slim
+FROM python:3.13.17-slim
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 UV_LINK_MODE=copy
 COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /uvx /bin/
 
 WORKDIR /app
 COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-dev --no-install-project
+RUN uv sync --locked --no-dev --no-install-project
 COPY solution ./solution
 COPY data ./data
 RUN useradd --create-home appuser \
