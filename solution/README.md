@@ -8,7 +8,7 @@ can be tested independently.
 ## Read The Solution In This Order
 
 1. [models.py](deployment_project/models.py) defines the service contracts.
-2. [provider.py](deployment_project/provider.py) supplies dry and Groq modes.
+2. [provider.py](deployment_project/provider.py) supplies dry mode and native calls selected with `init_chat_model`.
 3. [service.py](deployment_project/service.py) adds cache and concurrency;
    [tracing.py](deployment_project/tracing.py) exports JSONL or Langfuse Python SDK v5
    observations with usage, release, and quality evidence.
@@ -24,7 +24,7 @@ flowchart LR
     H["HTTP client"] --> I["FastAPI routes"]
     I --> B
     B --> C["Cache and concurrency"]
-    C --> D["Dry or Groq provider"]
+    C --> D["Dry or live provider"]
     B --> E["JSONL trace"]
     D --> E
     B --> F["Evaluation report"]
@@ -45,8 +45,9 @@ Evaluation writes `reports/generated/evaluation.md` and
 It calls the service directly; route tests and a load probe test the HTTP layer.
 Unit tests ignore `.env`, use the stub and keep their traces in temporary folders.
 
-The reference defaults to dry mode. Set `MODEL_PROVIDER=groq` and provide
-`GROQ_API_KEY` only when you intentionally want live provider calls.
+The reference defaults to dry mode. For intentional live calls, select
+`MODEL_PROVIDER=groq`, `mistral`, `openrouter` or `google` and set the matching key and model
+from `.env.example`. `init_chat_model` selects the native adapter.
 
 The stub returns canned answers and word-count token estimates. The live provider
 receives only the user prompt: it has no approved Northstar policy context.

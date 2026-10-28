@@ -5,7 +5,8 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
-from openai import APITimeoutError
+from groq import APITimeoutError
+from httpx import TimeoutException
 
 from solution.deployment_project.config import settings
 from solution.deployment_project.models import GenerateRequest, GenerateResponse
@@ -42,7 +43,7 @@ def ready() -> dict[str, str]:
 async def generate(request: GenerateRequest) -> GenerateResponse:
     try:
         return await service.generate(request)
-    except (TimeoutError, APITimeoutError) as exc:
+    except (TimeoutError, APITimeoutError, TimeoutException) as exc:
         raise HTTPException(
             status_code=504, detail="Generation request timed out"
         ) from exc

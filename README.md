@@ -176,7 +176,7 @@ uv run python -m solution.deployment_project evaluate
 uv run pytest
 ```
 
-These commands run the deterministic reference, not a live model. Try the project brief before inspecting the solution. Docker Desktop is required for the container exercise. Render deployment and live Groq calls can incur charges; credentials belong in `.env` or the hosting dashboard, never Git.
+These commands run the deterministic reference, not a live model. Try the project brief before inspecting the solution. Docker Desktop is required for the container exercise. For live calls, use `MODEL_PROVIDER=groq` (primary), `mistral` (alternative), `openrouter` or `google` (optional), with the matching key in `.env`. OpenRouter defaults to `google/gemma-4-26b-a4b-it:free`, with `openrouter/free` as a server-side backup configured by `OPENROUTER_FALLBACK_MODEL`. Responses identify the model actually used. Free accounts currently share [50 requests/day across free models](https://openrouter.ai/pricing). For optional direct [Gemma access](https://ai.google.dev/gemma/docs/core/gemma_on_gemini_api) through Google AI Studio, independent of OpenRouter, set `MODEL_PROVIDER=google`, `GOOGLE_API_KEY` and `GOOGLE_MODEL=gemma-4-26b-a4b-it`. Google free [rate limits](https://ai.google.dev/gemini-api/docs/rate-limits) vary by project and model; use only non-sensitive exercise data on the free tier. Render deployment and other live models can incur charges; credentials belong in `.env` or the hosting dashboard, never Git.
 
 ## Useful References
 
