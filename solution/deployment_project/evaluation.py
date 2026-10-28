@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import re
 import statistics
 from pathlib import Path
 
@@ -28,7 +29,8 @@ async def evaluate_case(case: EvaluationCase, service: GenerationService) -> Cas
         for _ in range(case.repeat)
     ]
     passed = all(
-        term.lower() in response.text.lower()
+        re.search(rf"(?<!\w){re.escape(term)}(?!\w)", response.text, re.IGNORECASE)
+        is not None
         for response in responses
         for term in case.expected_terms
     )
@@ -76,19 +78,22 @@ def render_report(results: list[CaseResult]) -> str:
 
 ## Decision
 
-The deterministic reference passes {passed}/{len(results)} functional and cache
-checks. It is suitable as a deployment scaffold, not as evidence that a live
+The deterministic reference passes {passed}/{len(results)} cases: each must match
+all expected terms in every response and verify caching when repeated.
+It is suitable as a deployment scaffold, not as evidence that a live
 provider meets production latency or answer-quality objectives.
 
 ## Case Results
 
-| Case | Terms Passed | Cache Verified | Mean Quality | Mean Latency ms |
+| Case | Expected Terms Matched | Cache Verified | Mean Heuristic Score | Mean Latency ms |
 |---|---:|---:|---:|---:|
 {rows}
 
 N/A means the case has no repeated request. Cache verification requires an
 initial miss followed by hits; mean latency includes every repeat, not just the
 last cached response. Neither these timings nor the keyword scores prove a live SLO.
+Expected-term matching uses whole words or phrases; it does not detect negation
+or establish that an answer is correct.
 
 ## Service Health And LLM Signals
 

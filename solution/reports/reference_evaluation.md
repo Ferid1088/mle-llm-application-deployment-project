@@ -2,13 +2,14 @@
 
 ## Decision
 
-The deterministic reference passes 5/5 functional and cache
-checks. It is suitable as a deployment scaffold, not as evidence that a live
+The deterministic reference passes 5/5 cases: each must match
+all expected terms in every response and verify caching when repeated.
+It is suitable as a deployment scaffold, not as evidence that a live
 provider meets production latency or answer-quality objectives.
 
 ## Case Results
 
-| Case | Terms Passed | Cache Verified | Mean Quality | Mean Latency ms |
+| Case | Expected Terms Matched | Cache Verified | Mean Heuristic Score | Mean Latency ms |
 |---|---:|---:|---:|---:|
 | refund_supported | True | True | 0.90 | 0.03 |
 | account_access | True | N/A | 0.90 | 0.02 |
@@ -19,6 +20,8 @@ provider meets production latency or answer-quality objectives.
 N/A means the case has no repeated request. Cache verification requires an
 initial miss followed by hits; mean latency includes every repeat, not just the
 last cached response. Neither these timings nor the keyword scores prove a live SLO.
+Expected-term matching uses whole words or phrases; it does not detect negation
+or establish that an answer is correct.
 
 ## Service Health And LLM Signals
 

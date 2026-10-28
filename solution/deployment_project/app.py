@@ -36,7 +36,11 @@ def health() -> dict[str, str]:
 
 @app.get("/ready")
 def ready() -> dict[str, str]:
-    return {"status": "ready", "provider": settings.provider, "model": settings.model}
+    return {
+        "status": "ready",
+        "provider": settings.provider,
+        "model": service.provider.model,
+    }
 
 
 @app.post("/generate", response_model=GenerateResponse)

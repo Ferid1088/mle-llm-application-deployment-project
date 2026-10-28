@@ -75,3 +75,25 @@ def test_evaluation_preserves_server_traces(tmp_path, monkeypatch):
     run_evaluation()
     assert server_trace.read_text() == "existing server evidence\n"
     assert server_trace.with_name("evaluation_traces.jsonl").exists()
+
+
+@pytest.mark.parametrize(
+    "text,passed", [("unconfirmed", False), ("Confirmed update.", True)]
+)
+def test_expected_terms_do_not_match_inside_other_words(text, passed):
+    service = MagicMock(spec=GenerationService)
+    service.generate = AsyncMock(
+        return_value=GenerateResponse(
+            text=text,
+            model="stub",
+            usage=Usage(input_tokens=1, output_tokens=1),
+            cache_hit=False,
+            latency_ms=1,
+            quality_score=0.4,
+            trace_id="test",
+        )
+    )
+    case = EvaluationCase(
+        case_id="test", prompt="question", expected_terms=["confirmed"], repeat=1
+    )
+    assert asyncio.run(evaluate_case(case, service)).passed is passed

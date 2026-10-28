@@ -10,6 +10,8 @@ from solution.deployment_project.models import GenerateRequest, ProviderResult, 
 
 
 class Provider(Protocol):
+    model: str
+
     async def generate(self, request: GenerateRequest) -> ProviderResult: ...
 
 

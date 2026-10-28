@@ -5,18 +5,16 @@ deployment project. It separates provider calls, service controls, API routes,
 evaluation, deployment configuration, and traces so each operational boundary
 can be tested independently.
 
-## Read The Solution In This Order
+## Read In Three Steps
 
-1. [models.py](deployment_project/models.py) defines the service contracts.
-2. [provider.py](deployment_project/provider.py) supplies dry mode and native calls selected with `init_chat_model`.
-3. [service.py](deployment_project/service.py) adds cache and concurrency;
+1. Follow one request from [app.py](deployment_project/app.py) through
+   [service.py](deployment_project/service.py) to [provider.py](deployment_project/provider.py).
+   [models.py](deployment_project/models.py) defines the contracts.
+2. Inspect cache, concurrency and deadlines in the service;
    [tracing.py](deployment_project/tracing.py) exports JSONL or Langfuse Python SDK v5
-   observations with usage, release, and quality evidence.
-4. [app.py](deployment_project/app.py) exposes the API.
-5. [evaluation.py](deployment_project/evaluation.py) evaluates every shared
-   case and renders the reference report.
-6. [Dockerfile](Dockerfile) and [render.yaml](render.yaml) package and deploy
-   the same application.
+   observations with usage, release, and heuristic scores.
+3. Run [evaluation.py](deployment_project/evaluation.py), then inspect
+   [Dockerfile](Dockerfile) and [render.yaml](render.yaml) for deployment.
 
 ```mermaid
 flowchart LR
@@ -48,6 +46,9 @@ Unit tests ignore `.env`, use the stub and keep their traces in temporary folder
 The reference defaults to dry mode. For intentional live calls, select
 `MODEL_PROVIDER=groq`, `mistral`, `openrouter` or `google` and set the matching key and model
 from `.env.example`. `init_chat_model` selects the native adapter.
+`/ready` confirms local initialization and identifies the configured provider
+model; it does not probe upstream availability. OpenRouter may select a fallback,
+so the generation response identifies the model actually used.
 
 The stub returns canned answers and word-count token estimates. The live provider
 receives only the user prompt: it has no approved Northstar policy context.
@@ -58,7 +59,8 @@ Concurrent misses may duplicate calls. API usage describes the returned answer;
 trace usage counts only new provider tokens. Failed calls report zero known
 usage, which does not prove the provider charged nothing.
 
-The evaluation checks expected words and cache behavior. The quality heuristic
+The evaluation checks expected whole words or phrases and cache behavior, not
+negation or semantic support. The quality heuristic
 can reward an incorrect answer containing those words; it is not a factuality score.
 Evaluation always uses the local stub and JSONL, regardless of live-service settings.
 Every repeated response is checked. Cache results are N/A for single-request

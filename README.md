@@ -21,14 +21,12 @@ By completing this project, you should be able to:
 
 ## Learning Path
 
-- [project-description.md](project-description.md): Scenario, requirements,
-  milestones, deliverables, and acceptance checklist.
-- [data/evaluation/cases.json](data/evaluation/cases.json): Shared functional
-  and cache-evaluation cases.
-- [data/operations/load_profile.json](data/operations/load_profile.json): Load
-  profile and service objectives used in the deployment report.
-- [solution/README.md](solution/README.md): Separate runnable reference
-  implementation to inspect after attempting the project.
+| Resource | Focus |
+|---|---|
+| [Project Brief](project-description.md) | Scenario, requirements, milestones, and deliverables. |
+| [Evaluation Cases](data/evaluation/cases.json) | Shared functional and cache-evaluation cases. |
+| [Load Profile](data/operations/load_profile.json) | Load profile and service objectives for the report. |
+| [Reference Solution](solution/README.md) | Runnable scaffold to inspect after attempting the project. |
 
 ### Additional Folders and Files
 
