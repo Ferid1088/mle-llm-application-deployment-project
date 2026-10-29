@@ -44,7 +44,7 @@ It calls the service directly; route tests and a load probe test the HTTP layer.
 Unit tests ignore `.env`, use the stub and keep their traces in temporary folders.
 
 The reference defaults to dry mode. For intentional live calls, select
-`MODEL_PROVIDER=groq`, `mistral`, `openrouter` or `google` and set the matching key and model
+`MODEL_PROVIDER=groq`, `mistral`, `openrouter`, `google` or `openai` and set the matching key and model
 from `.env.example`. `init_chat_model` selects the native adapter.
 `/ready` confirms local initialization and identifies the configured provider
 model; it does not probe upstream availability. OpenRouter may select a fallback,

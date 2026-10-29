@@ -22,6 +22,7 @@ class Settings:
         f"{provider.upper()}_MODEL" if provider != "dry" else "GROQ_MODEL",
         {
             "google": "gemma-4-26b-a4b-it",
+            "openai": "gpt-6-luna",
             "mistral": "ministral-14b-latest",
             "openrouter": "google/gemma-4-26b-a4b-it:free",
         }.get(provider, "openai/gpt-oss-20b"),

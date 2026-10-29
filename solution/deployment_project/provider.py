@@ -64,6 +64,8 @@ class ChatProvider:
             if settings.provider == "openrouter"
             else {"vertexai": False}
             if settings.provider == "google"
+            else {"reasoning_effort": "none"}
+            if settings.provider == "openai"
             else {}
         )
         self.client = init_chat_model(
@@ -107,6 +109,6 @@ class ChatProvider:
 def build_provider(settings: Settings) -> Provider:
     if settings.provider == "dry":
         return DryProvider()
-    if settings.provider in {"groq", "mistral", "openrouter", "google"}:
+    if settings.provider in {"groq", "mistral", "openrouter", "google", "openai"}:
         return ChatProvider(settings)
     raise ValueError(f"Unsupported provider: {settings.provider}")
