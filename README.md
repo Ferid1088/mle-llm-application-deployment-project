@@ -52,7 +52,7 @@ By completing this project, you should be able to:
    deployment report that decides whether the service meets its objectives.
 
 ```mermaid
-flowchart LR
+flowchart TD
     A["Client"] --> B["Render service"]
     B --> C["Typed FastAPI contract"]
     C --> D["Cache and concurrency control"]
