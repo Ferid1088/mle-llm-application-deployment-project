@@ -14,7 +14,22 @@ from openrouter.errors import OpenRouterError
 
 from solution.deployment_project.config import Settings
 from solution.deployment_project.models import GenerateRequest
-from solution.deployment_project.provider import ChatProvider
+from solution.deployment_project.provider import ChatProvider, build_provider
+
+
+@pytest.mark.parametrize("api_key", ["", "test-only"])
+def test_default_provider_is_groq_and_requires_its_key(monkeypatch, api_key):
+    monkeypatch.delenv("MODEL_PROVIDER")
+    monkeypatch.setenv("GROQ_API_KEY", api_key)
+    path = Path(__file__).parents[1] / "deployment_project/config.py"
+    configured = run_path(str(path))["settings"]
+    assert configured.provider == "groq"
+    assert configured.model == "openai/gpt-oss-20b"
+    if api_key:
+        assert isinstance(build_provider(configured), ChatProvider)
+    else:
+        with pytest.raises(ValueError, match="GROQ_API_KEY"):
+            build_provider(configured)
 
 
 @pytest.mark.parametrize(

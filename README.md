@@ -154,7 +154,7 @@ Python 3.13 is selected by `.python-version`. Install [uv](https://docs.astral.s
 cp .env.example .env
 ```
 
-Keep the defaults for the first local run. Never commit `.env` or real credentials.
+Keep `MODEL_PROVIDER=groq` and fill in `GROQ_API_KEY` for the first local API run. Never commit `.env` or real credentials.
 
 ---
 
@@ -174,7 +174,7 @@ uv run python -m solution.deployment_project evaluate
 uv run pytest
 ```
 
-These commands run the deterministic reference, not a live model. Try the project brief before inspecting the solution. Docker Desktop is required for the container exercise. For live calls, use `MODEL_PROVIDER=groq` (primary), `mistral` (alternative), `openrouter`, `google` or `openai` (optional), with the matching key in `.env`. OpenRouter defaults to `google/gemma-4-26b-a4b-it:free`, with `openrouter/free` as a server-side backup configured by `OPENROUTER_FALLBACK_MODEL`. Responses identify the model actually used. Free accounts currently share [50 requests/day across free models](https://openrouter.ai/pricing). For optional direct [Gemma access](https://ai.google.dev/gemma/docs/core/gemma_on_gemini_api) through Google AI Studio, independent of OpenRouter, set `MODEL_PROVIDER=google`, `GOOGLE_API_KEY` and `GOOGLE_MODEL=gemma-4-26b-a4b-it`. Google free [rate limits](https://ai.google.dev/gemini-api/docs/rate-limits) vary by project and model; use only non-sensitive exercise data on the free tier. Render deployment and other live models can incur charges; credentials belong in `.env` or the hosting dashboard, never Git. Set `MODEL_PROVIDER=openai`, `OPENAI_API_KEY` and `OPENAI_MODEL=gpt-6-luna` for direct [OpenAI access](https://developers.openai.com/api/docs/models/gpt-6-luna). API usage is paid; reasoning is disabled to keep the sampling settings compatible.
+These commands run the deterministic reference, not a live model. Try the project brief before inspecting the solution. Docker Desktop is required for the container exercise. The API defaults to `MODEL_PROVIDER=groq` and requires `GROQ_API_KEY`; set `MODEL_PROVIDER=dry` explicitly for the local stub. Alternatives are `mistral`, `openrouter`, `google` or `openai`, with the matching key in `.env`. OpenRouter defaults to `google/gemma-4-26b-a4b-it:free`, with `openrouter/free` as a server-side backup configured by `OPENROUTER_FALLBACK_MODEL`. Responses identify the model actually used. Free accounts currently share [50 requests/day across free models](https://openrouter.ai/pricing). For optional direct [Gemma access](https://ai.google.dev/gemma/docs/core/gemma_on_gemini_api) through Google AI Studio, independent of OpenRouter, set `MODEL_PROVIDER=google`, `GOOGLE_API_KEY` and `GOOGLE_MODEL=gemma-4-26b-a4b-it`. Google free [rate limits](https://ai.google.dev/gemini-api/docs/rate-limits) vary by project and model; use only non-sensitive exercise data on the free tier. Render deployment and other live models can incur charges; credentials belong in `.env` or the hosting dashboard, never Git. Set `MODEL_PROVIDER=openai`, `OPENAI_API_KEY` and `OPENAI_MODEL=gpt-6-luna` for direct [OpenAI access](https://developers.openai.com/api/docs/models/gpt-6-luna). API usage is paid; reasoning is disabled to keep the sampling settings compatible.
 
 ## Useful References
 

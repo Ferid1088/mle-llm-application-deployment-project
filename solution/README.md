@@ -1,6 +1,6 @@
 # Reference Solution
 
-This folder contains a deterministic reference scaffold for the Northstar
+This folder contains a reference scaffold for the Northstar
 deployment project. It separates provider calls, service controls, API routes,
 evaluation, deployment configuration, and traces so each operational boundary
 can be tested independently.
@@ -43,9 +43,10 @@ Evaluation writes `reports/generated/evaluation.md` and
 It calls the service directly; route tests and a load probe test the HTTP layer.
 Unit tests ignore `.env`, use the stub and keep their traces in temporary folders.
 
-The reference defaults to dry mode. For intentional live calls, select
-`MODEL_PROVIDER=groq`, `mistral`, `openrouter`, `google` or `openai` and set the matching key and model
-from `.env.example`. `init_chat_model` selects the native adapter.
+The API defaults to `MODEL_PROVIDER=groq` and requires `GROQ_API_KEY` in `.env`.
+Set `MODEL_PROVIDER=dry` explicitly for the local stub. For another live provider,
+select `mistral`, `openrouter`, `google` or `openai` and set the matching key and
+model from `.env.example`. `init_chat_model` selects the native adapter.
 `/ready` confirms local initialization and identifies the configured provider
 model; it does not probe upstream availability. OpenRouter may select a fallback,
 so the generation response identifies the model actually used.
@@ -86,7 +87,7 @@ From the repository root, test the container with:
 
 ```bash
 docker build -f solution/Dockerfile -t northstar-deployment .
-docker run --rm -p 127.0.0.1:8000:8000 northstar-deployment
+docker run --rm --env-file .env -p 127.0.0.1:8000:8000 northstar-deployment
 ```
 
 The supplied API has no authentication or rate limiting. Keep local tests on

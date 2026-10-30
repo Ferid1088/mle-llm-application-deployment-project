@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 class Settings:
     """Environment-backed deployment settings."""
 
-    provider: str = os.getenv("MODEL_PROVIDER", "dry")
+    provider: str = os.getenv("MODEL_PROVIDER", "groq")
     api_key: str = os.getenv(f"{provider.upper()}_API_KEY", "")
     model: str = os.getenv(
         f"{provider.upper()}_MODEL" if provider != "dry" else "GROQ_MODEL",
