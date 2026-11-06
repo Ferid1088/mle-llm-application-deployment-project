@@ -75,8 +75,9 @@ evaluation runs without credentials; set `TRACE_SINK=langfuse` to use the
 included Langfuse Python SDK v5 exporter (Cloud or self-hosted Langfuse 4.59.0+). Document prompt/output masking before live
 traffic.
 
-The exporter omits raw text, records failures and avoids generation observations
-on cache hits. JSONL still stores demo prompts and answers locally.
+The exporter omits raw text, records failures without answer-quality scores and
+avoids generation observations on cache hits. JSONL still stores demo prompts
+and answers locally.
 Cloud observation durations measure export work, not original request stages;
 use `request_latency_ms` metadata for the generation path, excluding trace export.
 Measure end-to-end HTTP latency with the load probe. Add live nested

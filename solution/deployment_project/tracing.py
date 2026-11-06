@@ -69,7 +69,8 @@ class LangfuseTraceSink:
                             "output": trace.usage.output_tokens,
                         },
                     )
-            root.score(name="quality", value=trace.quality_score)
+            if trace.status == "ok":
+                root.score(name="quality", value=trace.quality_score)
             root.update(
                 output={"status": trace.status, "output_chars": len(trace.output)}
             )

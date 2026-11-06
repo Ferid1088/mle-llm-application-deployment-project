@@ -24,9 +24,6 @@ By completing this project, you should be able to:
 | Resource | Focus |
 |---|---|
 | [Project Brief](project-description.md) | Scenario, requirements, milestones, and deliverables. |
-| [Evaluation Cases](data/evaluation/cases.json) | Shared functional and cache-evaluation cases. |
-| [Load Profile](data/operations/load_profile.json) | Load profile and service objectives for the report. |
-| [Reference Solution](solution/README.md) | Runnable scaffold to inspect after attempting the project. |
 
 ### Additional Folders and Files
 
@@ -35,6 +32,9 @@ By completing this project, you should be able to:
 | [**pyproject.toml**](pyproject.toml) | Project configuration and dependencies. |
 | [**uv.lock**](uv.lock) | Dependency lock file. |
 | [**.env.example**](.env.example) | Default settings and credential placeholders. |
+| [**Evaluation Cases**](data/evaluation/cases.json) | Shared functional and cache-evaluation cases. |
+| [**Load Profile**](data/operations/load_profile.json) | Load profile and service objectives for the report. |
+| [**Reference Solution**](solution/README.md) | Optional runnable scaffold to inspect after attempting the project. |
 | [**Assets**](assets/README.md) | Visual sources and credits. |
 
 ## Required Workflow
