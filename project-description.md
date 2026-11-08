@@ -14,6 +14,13 @@ about its operating limits. A reviewer should be able to deploy the container,
 verify health and inference, inspect a request trace, reproduce evaluation
 results, and decide whether the service meets its stated objectives.
 
+Use the [container lesson](https://github.com/neuefische/mle-containerized-llm-deployment)
+for the health, cache, and load checks, and the
+[observability lesson](https://github.com/neuefische/mle-llm-service-observability)
+for trace interpretation. Apply those checks to your own design. You choose
+how to supply approved policy context, implement the provider boundary, and
+measure quality.
+
 ## Required Implementation
 
 ### 1. API And Provider Boundary
@@ -62,18 +69,75 @@ Run every shared case and the supplied load profile. Submit
 
 ### Milestone 1 - Reproducible Service
 
-The API runs locally and in Docker, its tests mock external calls, and its
-health/readiness contracts are distinct.
+Start with one local process and a deterministic provider. Use
+`refund_supported` from [the shared cases](data/evaluation/cases.json) as your
+first smoke case: send the same prompt and parameters twice. For example,
+against your local API on port 8000:
+
+```bash
+curl -i http://127.0.0.1:8000/health
+curl -i http://127.0.0.1:8000/ready
+for attempt in 1 2; do
+  curl -sS http://127.0.0.1:8000/generate \
+    -H "Content-Type: application/json" \
+    -d '{"prompt":"What evidence is required for a duplicate-payment refund?"}'
+  printf '\n'
+done
+```
+
+The health response confirms that HTTP works; readiness confirms usable
+local configuration without a paid probe. Expect the first generation to
+miss a fresh cache and the second to hit within the TTL. Check the response
+or trace flag and the provider call count in your tests; lower latency alone
+does not prove reuse.
+
+Repeat the same requests against the built container. Include tests for a
+blank prompt, timeout, and upstream failure. Show which failures reach the
+provider and which are rejected before it is called.
+
+**Checkpoint:** a reviewer can run your tests without API keys and reproduce
+both the normal response and a negative case.
 
 ### Milestone 2 - Hosted And Observable
 
-The Render service answers a live request, keeps credentials out of Git, and
-exports a complete Langfuse observation tree with release metadata.
+Deploy the same container contract using your approved Render setup. Keep
+secrets in the platform configuration and protect the endpoint before
+enabling paid generation. Record the deployed revision, model, environment,
+instance count, and limits so the result can be reproduced.
+
+Use a synthetic request and follow its trace ID from the API result to the
+root observation and its stages. Compare a miss with a hit: the hit should
+have cache evidence but no new provider tokens or generation span. Verify
+observation delivery separately from the HTTP response; a 200 does not prove
+that telemetry arrived. Show one failure trace without counting it as an
+answer-quality sample.
+
+**Checkpoint:** demonstrate a working hosted route and a correlated
+observation tree without exposing credentials or raw customer text. State
+what remains unverified if a live provider or cloud export was unavailable.
 
 ### Milestone 3 - Evidence-Based Decision
 
-The shared evaluation and load probe are reproducible, and the report gives a
-clear deploy, revise, or stop recommendation tied to measured evidence.
+Run all five functional cases, including the repeated refund request and
+the unsupported-policy case. Keep their results separate from the
+[load profile](data/operations/load_profile.json): 40 HTTP attempts with up
+to five in flight. The functional cases check behavior; the load run checks
+the service under the stated workload.
+
+| Objective | Compare it with |
+|---|---|
+| p95 latency at most 2,000 ms | End-to-end HTTP latency for the stated run. Declare whether failures are included and how p95 is computed. |
+| Error rate at most 2% | Failed HTTP or transport attempts divided by all attempts. One failure in 40 is 2.5%, so it misses this target. |
+| Mean quality at least 0.8 | Scores from successful answers evaluated with your stated rubric. Report the sample count and rubric limitations. |
+
+For each result in the report, record the command, workload, environment,
+observed value, target, and interpretation. Separate stub, live, and untested
+results. An unmeasured objective is not a pass, and a keyword check is not
+evidence of correct policy advice.
+
+**Checkpoint:** make a deploy, revise, or stop recommendation. Tie it to one
+measured result, one trace, and the next experiment that would change your
+decision.
 
 ## Minimum Acceptance Checklist
 

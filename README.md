@@ -6,9 +6,9 @@ API, a reproducible container, resilient caching, and observability for service
 health and LLM-specific behavior.
 
 This assignment combines the preceding FastAPI, container deployment, and
-Langfuse units. The default evaluation is deterministic and requires no API
-keys; your deployed evidence should use a live provider when available and
-record the resulting operational trade-offs.
+Langfuse units. Start with a local, repeatable baseline, then collect evidence
+from the hosted service. The supplied dry-mode evaluation needs no API keys
+and does not establish live inference quality or capacity.
 
 ## Learning Objectives
 
@@ -37,19 +37,15 @@ By completing this project, you should be able to:
 | [**Reference Solution**](solution/README.md) | Optional runnable scaffold to inspect after attempting the project. |
 | [**Assets**](assets/README.md) | Visual sources and credits. |
 
-## Required Workflow
+## Start The Project
 
-1. Define typed health, readiness, and generation contracts.
-2. Implement provider-backed generation with bounded concurrency and graceful
-   upstream failure handling.
-3. Add exact-match caching and prove that repeated requests avoid redundant
-   provider usage.
-4. Package the service in Docker and deploy it to Render with secrets and
-   health checks configured outside the image.
-5. Instrument request, retrieval or preparation, generation, cache, token,
-   cost, latency, error, release, and quality signals.
-6. Run the shared functional evaluation and load profile, then write a
-   deployment report that decides whether the service meets its objectives.
+1. Read the [required implementation](project-description.md#required-implementation)
+   and agree on your API contract before choosing a provider.
+2. Inspect the [shared cases](data/evaluation/cases.json) and
+   [load profile](data/operations/load_profile.json). Keep their inputs,
+   labels, and thresholds unchanged so reviewers can reproduce your results.
+3. Follow the [three milestones](project-description.md#suggested-milestones).
+   Each ends with a concrete check you can carry into the final report.
 
 ```mermaid
 flowchart TD
@@ -141,7 +137,7 @@ The command below installs all dependencies and creates a virtual environment in
 
 ```bash
 cd <repo-name>
-uv sync
+uv sync --locked
 ```
 
 Python 3.13 is selected by `.python-version`. Install [uv](https://docs.astral.sh/uv/getting-started/installation/) first if needed.
@@ -151,10 +147,13 @@ Python 3.13 is selected by `.python-version`. Install [uv](https://docs.astral.s
 ### 5. Set Up Environment Variables
 
 ```bash
-cp .env.example .env
+test -f .env || cp .env.example .env
 ```
 
-Keep `MODEL_PROVIDER=groq` and fill in `GROQ_API_KEY` for the first local API run. Never commit `.env` or real credentials.
+Start with a stub and local trace output to check your own API. The supplied
+reference uses `MODEL_PROVIDER=dry` and `TRACE_SINK=jsonl` for that path.
+For a live run, use the matching provider, model and credentials from
+[`.env.example`](.env.example). Never commit `.env` or real credentials.
 
 ---
 
@@ -166,15 +165,21 @@ code .
 
 Select the Python interpreter in `.venv/` and run commands from the repository root.
 
-## Run Locally
+## Inspect The Provided Inputs
 
 ```bash
-uv run python -m solution.deployment_project inspect-data
-uv run python -m solution.deployment_project evaluate
-uv run pytest
+uv run --locked python -m json.tool data/operations/load_profile.json
 ```
 
-These commands run the deterministic reference, not a live model. Try the project brief before inspecting the solution. Docker Desktop is required for the container exercise. The API defaults to `MODEL_PROVIDER=groq` and requires `GROQ_API_KEY`; set `MODEL_PROVIDER=dry` explicitly for the local stub. Alternatives are `mistral`, `openrouter`, `google` or `openai`, with the matching key in `.env`. OpenRouter defaults to `google/gemma-4-26b-a4b-it:free`, with `openrouter/free` as a server-side backup configured by `OPENROUTER_FALLBACK_MODEL`. Responses identify the model actually used. Free accounts currently share [50 requests/day across free models](https://openrouter.ai/pricing). For optional direct [Gemma access](https://ai.google.dev/gemma/docs/core/gemma_on_gemini_api) through Google AI Studio, independent of OpenRouter, set `MODEL_PROVIDER=google`, `GOOGLE_API_KEY` and `GOOGLE_MODEL=gemma-4-26b-a4b-it`. Google free [rate limits](https://ai.google.dev/gemini-api/docs/rate-limits) vary by project and model; use only non-sensitive exercise data on the free tier. Render deployment and other live models can incur charges; credentials belong in `.env` or the hosting dashboard, never Git. Set `MODEL_PROVIDER=openai`, `OPENAI_API_KEY` and `OPENAI_MODEL=gpt-6-luna` for direct [OpenAI access](https://developers.openai.com/api/docs/models/gpt-6-luna). API usage is paid; reasoning is disabled to keep the sampling settings compatible.
+Expect 40 requests at concurrency 5, with separate latency, error-rate, and
+quality objectives. This only reads the workload definition; it does not
+send requests or produce an evaluation result. Start Docker before the
+container milestone. The examples use Bash syntax; on Windows, use Git Bash.
+
+After attempting the project, use the [reference walkthrough](solution/README.md)
+to compare your API and evaluation evidence. The reference is a scaffold,
+not a completed submission. Hosted resources and live model calls can incur
+charges; use an approved setup before deploying.
 
 ## Useful References
 

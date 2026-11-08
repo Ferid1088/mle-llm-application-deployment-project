@@ -28,20 +28,59 @@ flowchart LR
     B --> F["Evaluation report"]
 ```
 
-## Run The Reference Workflow
+## Run The Offline Evaluation
 
 ```bash
-uv run python -m solution.deployment_project inspect-data
-uv run python -m solution.deployment_project evaluate
-uv run pytest solution/tests
-uv run uvicorn solution.deployment_project.app:app --reload
+uv run --locked python -m solution.deployment_project inspect-data
+uv run --locked python -m solution.deployment_project evaluate
+uv run --locked pytest solution/tests
 ```
 
 Evaluation writes `reports/generated/evaluation.md` and
 `solution/generated/evaluation_traces.jsonl`. It does not overwrite the
 [checked-in example report](reports/reference_evaluation.md) or API traces.
-It calls the service directly; route tests and a load probe test the HTTP layer.
+Expect five cases, a load profile of 40 requests at concurrency 5, and a
+5/5 result in the dry evaluation report. The repeated refund case verifies
+caching; the other cases have no repeated request. The evaluation calls
+the service directly; route tests and a load probe test the HTTP layer.
 Unit tests ignore `.env`, use the stub and keep their traces in temporary folders.
+
+## Follow One HTTP Request
+
+Run from the repository root. Use the default cache TTL and a fresh process
+so the first request is a miss. Choose a separate trace file from the
+evaluation output:
+
+```bash
+MODEL_PROVIDER=dry TRACE_SINK=jsonl TRACE_PATH=solution/generated/walkthrough-traces.jsonl \
+  uv run --locked uvicorn solution.deployment_project.app:app
+```
+
+From another terminal, run the two refund requests in
+[milestone 1](../project-description.md#milestone-1---reproducible-service).
+Both should return a typed result, model `dry-northstar-v1` and a `trace_id`. The
+second should have `cache_hit: true`. Use the two response IDs to find the
+matching JSONL records. To compare the latest two records without printing
+raw prompts or answers:
+
+```bash
+uv run --locked python - <<'PY'
+import json
+from pathlib import Path
+
+path = Path("solution/generated/walkthrough-traces.jsonl")
+for line in path.read_text().splitlines()[-2:]:
+    trace = json.loads(line)
+    print(trace["trace_id"], trace["cache_hit"], trace["spans"], trace["usage"])
+PY
+```
+
+Expect a miss with `cache-lookup` and `llm-generation`, followed by a hit
+with only `cache-lookup` and zero new provider tokens. The API still reports
+the cached answer's original token counts. Stop Uvicorn with Ctrl+C before
+running the container on the same port.
+
+## Interpret The Reference Results
 
 The API defaults to `MODEL_PROVIDER=groq` and requires `GROQ_API_KEY` in `.env`.
 Set `MODEL_PROVIDER=dry` explicitly for the local stub. For another live provider,
@@ -88,8 +127,12 @@ From the repository root, test the container with:
 
 ```bash
 docker build -f solution/Dockerfile -t northstar-deployment .
-docker run --rm --env-file .env -p 127.0.0.1:8000:8000 northstar-deployment
+docker run --rm -e MODEL_PROVIDER=dry -e TRACE_SINK=jsonl \
+  -p 127.0.0.1:8000:8000 northstar-deployment
 ```
 
-The supplied API has no authentication or rate limiting. Keep local tests on
-loopback; protect a public deployment before enabling paid model calls.
+Repeat the health and generation checks against the container. It has its
+own cache and trace file. Stop it with Ctrl+C when finished; this temporary
+container's traces are not saved on the host. The supplied API has no
+authentication or rate limiting. Keep local tests on loopback; protect a
+public deployment before enabling paid model calls.
