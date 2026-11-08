@@ -124,6 +124,22 @@ the unsupported-policy case. Keep their results separate from the
 to five in flight. The functional cases check behavior; the load run checks
 the service under the stated workload.
 
+For a local smoke run, start your API on port 8000 with the deterministic
+provider. From the root of your **container deployment lesson** checkout,
+reuse its load probe against the project's API:
+
+```bash
+uv run --locked python scripts/load_test.py --url http://127.0.0.1:8000 \
+  --requests 40 --concurrency 5
+```
+
+The probe expects `POST /generate` to accept a JSON object with a `prompt`.
+Expect 40 successes for a healthy stub. It cycles three prompts and checks
+HTTP status, not the answer, so label the workload as cache-heavy and keep it
+separate from the five functional cases. Record whether the cache started
+warm or cold. Repeat against your approved hosted endpoint for hosted evidence,
+using a probe that supports your endpoint's authentication when needed.
+
 | Objective | Compare it with |
 |---|---|
 | p95 latency at most 2,000 ms | End-to-end HTTP latency for the stated run. Declare whether failures are included and how p95 is computed. |
@@ -134,6 +150,11 @@ For each result in the report, record the command, workload, environment,
 observed value, target, and interpretation. Separate stub, live, and untested
 results. An unmeasured objective is not a pass, and a keyword check is not
 evidence of correct policy advice.
+
+For example, a local run with 39/40 successes and p95 of 800 ms passes the
+latency objective for that run but fails the error objective (2.5%).
+If you did not score the answers, mark quality as **not measured**. Do not
+use these local results to approve a hosted rollout.
 
 **Checkpoint:** make a deploy, revise, or stop recommendation. Tie it to one
 measured result, one trace, and the next experiment that would change your
