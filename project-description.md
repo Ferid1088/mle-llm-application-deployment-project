@@ -17,7 +17,10 @@ for the health, cache, and load checks, and the
 [observability lesson](https://github.com/neuefische/mle-llm-service-observability)
 for trace interpretation. Apply those checks to your own design. You choose
 how to supply approved policy context, implement the provider boundary, and
-measure quality.
+measure quality. A short system prompt that states the Northstar support
+policies covered by the [shared cases](data/evaluation/cases.json) is enough
+policy context, as long as the assistant declines questions those policies do
+not cover. Retrieval over policy documents is optional.
 
 ## Required Implementation
 
@@ -35,8 +38,8 @@ cache is process-local or shared across instances.
 
 ### 3. Reproducible Deployment
 
-Build a locked Python 3.13 image that runs as the same service locally and on
-Render. Configure secrets outside the image, expose a lightweight health check,
+Build a locked Python 3.13 image that runs as the same service locally and as
+a Free Render web service. Configure secrets outside the image, expose a lightweight health check,
 and justify the selected instance count and scaling strategy.
 
 ### 4. LLM Observability
@@ -45,6 +48,13 @@ Record a root request observation plus nested cache, retrieval or preparation,
 and generation stages. Include model, token usage, cost, latency, status,
 environment, release, and a quality score. Define masking and sampling choices
 for prompts and outputs.
+
+Use the Langfuse exporter in the observability lesson's
+[`recorder.py`](https://github.com/neuefische/mle-llm-service-observability/blob/main/src/observability_lab/recorder.py)
+as your pattern. It shows the SDK calls for a root observation, nested spans, a
+generation with usage and cost, and a score. Recording each trace right after
+the request finishes, from the values your service measured while handling it,
+is enough.
 
 ### 5. Evaluation And Report
 
@@ -94,11 +104,17 @@ both the normal response and a negative case.
 
 ### Milestone 2 - Hosted And Observable
 
-Deploy the same container contract using your approved Render setup. Keep
-secrets in the platform configuration. The service is public, so anyone who
-finds its URL can use your provider quota: use sample prompts, keep live tests
-brief, and only share the URL while it runs with the dry provider. Record the deployed revision, model, environment,
-instance count, and limits so the result can be reproduced.
+Deploy the same container as a Free Render web service: choose **New > Web Service** and select **Free** compute.
+The Blueprint creation flow asks for a payment method even on the Free
+instance plan, so do not deploy from a Blueprint. Keep secrets in the platform
+configuration. The service is public, so anyone who finds its URL can use your
+provider quota: use sample prompts, keep live tests brief, and only share the
+URL while it runs with the dry provider. Record the service URL, deployed
+revision, model, environment, instance count, and limits so the result can be
+reproduced.
+
+**Bonus:** add a `render.yaml` reference Blueprint that documents your web
+service settings.
 
 Use a synthetic request and follow its trace ID from the API result to the
 root observation and its stages. Compare a miss with a hit: the hit should
@@ -131,7 +147,10 @@ The probe expects `POST /generate` to accept a JSON object with a `prompt`.
 Expect 40 successes for a healthy dry provider. It cycles three prompts and checks
 HTTP status, not the answer, so label the workload as cache-heavy and keep it
 separate from the five functional cases. Record whether the cache started
-warm or cold. Repeat against your approved hosted endpoint for hosted evidence.
+warm or cold. For hosted evidence, repeat the run against your Render URL
+only while the service runs with the dry provider, so the probe uses no
+provider quota. Otherwise, mark the hosted load result as **untested** in the
+report.
 
 | Objective | Compare it with |
 |---|---|
@@ -158,7 +177,8 @@ decision.
 - [ ] API input and output contracts are typed and tested.
 - [ ] Provider calls are asynchronous, bounded, and replaceable in tests.
 - [ ] Repeated identical requests demonstrate a cache hit.
-- [ ] Docker health checks pass locally.
+- [ ] `/health` returns 200 from the running container, locally and on Render.
+- [ ] The same container runs as a Free Render web service.
 - [ ] Render secrets are not committed.
 - [ ] Observations include nested stages, usage, cost, release, and quality.
 - [ ] All shared evaluation cases run without editing their labels.

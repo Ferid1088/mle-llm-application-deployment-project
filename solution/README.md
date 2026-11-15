@@ -13,8 +13,9 @@ can be tested independently.
 2. Inspect cache, concurrency, and deadlines in the service;
    [tracing.py](deployment_project/tracing.py) exports JSONL or Langfuse Python SDK v5
    observations with usage, release, and heuristic scores.
-3. Run [evaluation.py](deployment_project/evaluation.py), then inspect
-   [Dockerfile](Dockerfile) and [render.yaml](render.yaml) for deployment.
+3. Run [evaluation.py](deployment_project/evaluation.py), then inspect the
+   [Dockerfile](Dockerfile) for deployment and the reference Blueprint
+   [render.yaml](render.yaml) for the Render service settings.
 
 ```mermaid
 flowchart LR
@@ -108,8 +109,11 @@ cases; mean latency includes both the initial miss and subsequent hits.
 
 ## Deployment Notes
 
-The checked-in Blueprint uses one paid starter instance and requests secrets
-from the Render dashboard. JSONL is the default trace sink so the full
+The checked-in [render.yaml](render.yaml) is a reference Blueprint for the
+service settings on one Free instance. In Render, the Blueprint creation flow
+asks for a payment method even on the Free instance plan, so deploy with
+**New > Web Service** and **Free** compute instead, and set the secrets in the
+Render dashboard. JSONL is the default trace sink so the full
 evaluation runs without credentials; set `TRACE_SINK=langfuse` to use the
 included Langfuse Python SDK v5 exporter (Cloud or self-hosted Langfuse 4.59.0+). Document prompt/output masking before live
 traffic.

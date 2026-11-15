@@ -158,7 +158,8 @@ Your repository must include:
   replaceable provider interface,
 - cache and capacity controls: a parameter-aware cache key, TTL, bounded
   concurrency, and timeouts,
-- a Dockerfile that runs the same service locally and as a Render web service,
+- a Dockerfile that runs the same service locally and on Render,
+- the service deployed as a Free Render web service, with its URL in the report,
 - Langfuse observations with nested stages, token usage, cost, latency, and a
   quality score,
 - tests covering valid requests, invalid input, and upstream failures,
@@ -167,6 +168,6 @@ Your repository must include:
 
 ## References & Further Reading
 
-- Render: [Docker Deployment](https://render.com/docs/docker) / [Blueprint Specification](https://render.com/docs/blueprint-spec)
+- Render: [Free Instances](https://render.com/docs/free) / [Docker on Render](https://render.com/docs/docker) / [Blueprint Specification](https://render.com/docs/blueprint-spec)
 - Langfuse: [Observability](https://langfuse.com/docs/observability/overview) / [Scores](https://langfuse.com/docs/evaluation/scores/overview)
 - [FastAPI Deployment Concepts](https://fastapi.tiangolo.com/deployment/concepts/)

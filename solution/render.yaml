@@ -2,13 +2,14 @@ services:
   - type: web
     name: northstar-llm-deployment-project
     runtime: docker
-    plan: starter
+    plan: free
     dockerfilePath: ./solution/Dockerfile
     dockerContext: .
     healthCheckPath: /health
-    numInstances: 1
     autoDeployTrigger: commit
     envVars:
+      - key: PORT
+        value: "8000"
       - key: MODEL_PROVIDER
         value: groq
       - key: GROQ_MODEL

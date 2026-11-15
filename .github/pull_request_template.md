@@ -8,8 +8,8 @@
 - [ ] Invalid requests fail before the LLM provider is called, and provider failures produce an explicit API response.
 - [ ] The generation cache key includes every output-affecting parameter, and repeated identical requests to `/generate` return a cache hit.
 - [ ] I configured a cache TTL, a limit on concurrent provider calls, and request timeouts.
-- [ ] The Docker container builds locally and its `/health` check passes.
-- [ ] I deployed the same container as a Render web service, and the LLM provider and Langfuse credentials are set in Render, not committed.
+- [ ] The Docker container builds locally, and `/health` returns 200 from the running container locally and on Render.
+- [ ] I deployed the same container as a Free Render web service, and the LLM provider and Langfuse credentials are set in Render, not committed.
 - [ ] Langfuse observations include nested cache and generation stages, token usage, cost, release, and a quality score.
 - [ ] I followed one request's trace ID from the API response to its Langfuse observation tree and compared a cache miss with a cache hit.
 - [ ] All shared evaluation cases in `data/evaluation/cases.json` run without editing their labels.
