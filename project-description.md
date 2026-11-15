@@ -1,20 +1,18 @@
-# LLM Application Deployment Project Brief
-
-## Scenario
+# Project Description
 
 Northstar has prototyped a support assistant that answers operational questions.
 The prototype works on a developer laptop but has no stable deployment contract,
 no capacity evidence, and no way to connect answer-quality regressions to a
 release or provider call. Your team must turn it into a deployment candidate.
 
-## Main Goal
+## Main Task
 
 Build and evaluate an application that is reproducible, observable, and honest
 about its operating limits. A reviewer should be able to deploy the container,
 verify health and inference, inspect a request trace, reproduce evaluation
 results, and decide whether the service meets its stated objectives.
 
-Use the [container lesson](https://github.com/neuefische/mle-containerized-llm-deployment)
+Use the [deployment lesson](https://github.com/neuefische/mle-containerized-llm-deployment)
 for the health, cache, and load checks, and the
 [observability lesson](https://github.com/neuefische/mle-llm-service-observability)
 for trace interpretation. Apply those checks to your own design. You choose
@@ -41,10 +39,6 @@ Build a locked Python 3.13 image that runs as the same service locally and on
 Render. Configure secrets outside the image, expose a lightweight health check,
 and justify the selected instance count and scaling strategy.
 
-![Preble architecture for distributed prompt scheduling and model serving](assets/preble-architecture.png)
-
-*Source: Figure 6 from the scientific paper [Preble: Efficient Distributed Prompt Scheduling for LLM Serving](https://arxiv.org/abs/2407.00023). Use it as a discussion prompt for scheduling, queueing, and capacity decisions.*
-
 ### 4. LLM Observability
 
 Record a root request observation plus nested cache, retrieval or preparation,
@@ -57,20 +51,20 @@ for prompts and outputs.
 Run every shared case and the supplied load profile. Submit
 `reports/deployment_report.md` with:
 
-- deployment architecture and configuration;
-- functional result and cache-hit evidence per case;
-- throughput, p95 latency, and error rate;
-- token, cost, and answer-quality summaries;
-- one trace-based failure analysis;
-- comparison with every service objective; and
+- deployment architecture and configuration,
+- functional result and cache-hit evidence per case,
+- throughput, p95 latency, and error rate,
+- token, cost, and answer-quality summaries,
+- one trace-based failure analysis,
+- comparison with every service objective,
 - three prioritized changes before production approval.
 
 ## Suggested Milestones
 
 ### Milestone 1 - Reproducible Service
 
-Start with one local process and a deterministic provider. Use
-`refund_supported` from [the shared cases](data/evaluation/cases.json) as your
+Start with one local process and a dry provider. Use
+`refund_supported` from the [shared cases](data/evaluation/cases.json) as your
 first smoke case: send the same prompt and parameters twice. For example,
 against your local API on port 8000:
 
@@ -86,7 +80,7 @@ done
 ```
 
 The health response confirms that HTTP works; readiness confirms usable
-local configuration without a paid probe. Expect the first generation to
+local configuration without calling the provider. Expect the first generation to
 miss a fresh cache and the second to hit within the TTL. Check the response
 or trace flag and the provider call count in your tests; lower latency alone
 does not prove reuse.
@@ -101,8 +95,9 @@ both the normal response and a negative case.
 ### Milestone 2 - Hosted And Observable
 
 Deploy the same container contract using your approved Render setup. Keep
-secrets in the platform configuration and protect the endpoint before
-enabling paid generation. Record the deployed revision, model, environment,
+secrets in the platform configuration. The service is public, so anyone who
+finds its URL can use your provider quota: use sample prompts, keep live tests
+brief, and only share the URL while it runs with the dry provider. Record the deployed revision, model, environment,
 instance count, and limits so the result can be reproduced.
 
 Use a synthetic request and follow its trace ID from the API result to the
@@ -124,21 +119,19 @@ the unsupported-policy case. Keep their results separate from the
 to five in flight. The functional cases check behavior; the load run checks
 the service under the stated workload.
 
-For a local smoke run, start your API on port 8000 with the deterministic
-provider. From the root of your **container deployment lesson** checkout,
-reuse its load probe against the project's API:
+For a local smoke run, start your API on port 8000 with the dry provider.
+From the repository root, run the load probe against the project's API:
 
 ```bash
-uv run --locked python scripts/load_test.py --url http://127.0.0.1:8000 \
+uv run python scripts/load_test.py --url http://127.0.0.1:8000 \
   --requests 40 --concurrency 5
 ```
 
 The probe expects `POST /generate` to accept a JSON object with a `prompt`.
-Expect 40 successes for a healthy stub. It cycles three prompts and checks
+Expect 40 successes for a healthy dry provider. It cycles three prompts and checks
 HTTP status, not the answer, so label the workload as cache-heavy and keep it
 separate from the five functional cases. Record whether the cache started
-warm or cold. Repeat against your approved hosted endpoint for hosted evidence,
-using a probe that supports your endpoint's authentication when needed.
+warm or cold. Repeat against your approved hosted endpoint for hosted evidence.
 
 | Objective | Compare it with |
 |---|---|
@@ -147,7 +140,7 @@ using a probe that supports your endpoint's authentication when needed.
 | Mean quality at least 0.8 | Scores from successful answers evaluated with your stated rubric. Report the sample count and rubric limitations. |
 
 For each result in the report, record the command, workload, environment,
-observed value, target, and interpretation. Separate stub, live, and untested
+observed value, target, and interpretation. Separate dry, live, and untested
 results. An unmeasured objective is not a pass, and a keyword check is not
 evidence of correct policy advice.
 
@@ -162,7 +155,6 @@ decision.
 
 ## Minimum Acceptance Checklist
 
-- [ ] Python 3.13 dependencies resolve from `uv.lock`.
 - [ ] API input and output contracts are typed and tested.
 - [ ] Provider calls are asynchronous, bounded, and replaceable in tests.
 - [ ] Repeated identical requests demonstrate a cache hit.
@@ -173,7 +165,7 @@ decision.
 - [ ] Load evidence is compared with all supplied objectives.
 - [ ] The final report makes an explicit deployment recommendation.
 
-## Submission Questions
+## Answer The Following Questions
 
 1. Which failure should make readiness fail, and which should affect only one
    generation request?

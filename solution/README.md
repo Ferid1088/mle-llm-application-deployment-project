@@ -10,7 +10,7 @@ can be tested independently.
 1. Follow one request from [app.py](deployment_project/app.py) through
    [service.py](deployment_project/service.py) to [provider.py](deployment_project/provider.py).
    [models.py](deployment_project/models.py) defines the contracts.
-2. Inspect cache, concurrency and deadlines in the service;
+2. Inspect cache, concurrency, and deadlines in the service;
    [tracing.py](deployment_project/tracing.py) exports JSONL or Langfuse Python SDK v5
    observations with usage, release, and heuristic scores.
 3. Run [evaluation.py](deployment_project/evaluation.py), then inspect
@@ -31,9 +31,9 @@ flowchart LR
 ## Run The Offline Evaluation
 
 ```bash
-uv run --locked python -m solution.deployment_project inspect-data
-uv run --locked python -m solution.deployment_project evaluate
-uv run --locked pytest solution/tests
+uv run python -m solution.deployment_project inspect-data
+uv run python -m solution.deployment_project evaluate
+uv run pytest solution/tests
 ```
 
 Evaluation writes `reports/generated/evaluation.md` and
@@ -43,7 +43,7 @@ Expect five cases, a load profile of 40 requests at concurrency 5, and a
 5/5 result in the dry evaluation report. The repeated refund case verifies
 caching; the other cases have no repeated request. The evaluation calls
 the service directly; route tests and a load probe test the HTTP layer.
-Unit tests ignore `.env`, use the stub and keep their traces in temporary folders.
+Unit tests ignore `.env`, use the dry provider and keep their traces in temporary folders.
 
 ## Follow One HTTP Request
 
@@ -53,7 +53,7 @@ evaluation output:
 
 ```bash
 MODEL_PROVIDER=dry TRACE_SINK=jsonl TRACE_PATH=solution/generated/walkthrough-traces.jsonl \
-  uv run --locked uvicorn solution.deployment_project.app:app
+  uv run uvicorn solution.deployment_project.app:app
 ```
 
 From another terminal, run the two refund requests in
@@ -64,7 +64,7 @@ matching JSONL records. To compare the latest two records without printing
 raw prompts or answers:
 
 ```bash
-uv run --locked python - <<'PY'
+uv run python - <<'PY'
 import json
 from pathlib import Path
 
@@ -83,14 +83,14 @@ running the container on the same port.
 ## Interpret The Reference Results
 
 The API defaults to `MODEL_PROVIDER=groq` and requires `GROQ_API_KEY` in `.env`.
-Set `MODEL_PROVIDER=dry` explicitly for the local stub. For another live provider,
+Set `MODEL_PROVIDER=dry` explicitly for an offline run. For another live provider,
 select `mistral`, `openrouter`, `google` or `openai` and set the matching key and
 model from `.env.example`. `init_chat_model` selects the native adapter.
 `/ready` confirms local initialization and identifies the configured provider
 model; it does not probe upstream availability. OpenRouter may select a fallback,
 so the generation response identifies the model actually used.
 
-The stub returns canned answers and word-count token estimates. The live provider
+The dry provider returns canned answers and word-count token estimates. The live provider
 receives only the user prompt: it has no approved Northstar policy context.
 Do not treat either path as a validated policy assistant.
 
@@ -102,7 +102,7 @@ usage, which does not prove the provider charged nothing.
 The evaluation checks expected whole words or phrases and cache behavior, not
 negation or semantic support. The quality heuristic
 can reward an incorrect answer containing those words; it is not a factuality score.
-Evaluation always uses the local stub and JSONL, regardless of live-service settings.
+Evaluation always uses the offline dry provider and JSONL, regardless of live-service settings.
 Every repeated response is checked. Cache results are N/A for single-request
 cases; mean latency includes both the initial miss and subsequent hits.
 
@@ -133,6 +133,7 @@ docker run --rm -e MODEL_PROVIDER=dry -e TRACE_SINK=jsonl \
 
 Repeat the health and generation checks against the container. It has its
 own cache and trace file. Stop it with Ctrl+C when finished; this temporary
-container's traces are not saved on the host. The supplied API has no
-authentication or rate limiting. Keep local tests on loopback; protect a
-public deployment before enabling paid model calls.
+container's traces are not saved on the host. Once deployed, the API is
+public: anyone who finds its URL can use your provider quota. Keep local tests
+on loopback, keep live tests brief, and only share the URL while it runs with
+the dry provider.

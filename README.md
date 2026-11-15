@@ -1,14 +1,14 @@
 # LLM Application Deployment Project
 
-Use this repository as a **template** for your final deployment project.
+Use this repository as a **template** for your LLM deployment project.
 Deploy a production-shaped Northstar support assistant with a typed inference
 API, a reproducible container, resilient caching, and observability for service
-health and LLM-specific behavior.
+health and LLM-specific behavior. Create pull requests in your own copy even if
+you are working alone, and use them to track your progress.
 
 This assignment combines the preceding FastAPI, container deployment, and
 Langfuse units. Start with a local, repeatable baseline, then collect evidence
-from the hosted service. The supplied dry-mode evaluation needs no API keys
-and does not establish live inference quality or capacity.
+from the hosted service.
 
 ## Learning Objectives
 
@@ -22,7 +22,7 @@ By the end of this repository, you should be able to:
 ## Learning Path
 
 ```mermaid
-flowchart TD
+flowchart LR
     A["Client"] --> B["Render service"]
     B --> C["Typed FastAPI contract"]
     C --> D["Cache and concurrency control"]
@@ -42,20 +42,20 @@ flowchart TD
 |---|---|
 | [**data/evaluation**](data/evaluation/cases.json) | Shared functional and cache-evaluation cases. |
 | [**data/operations**](data/operations/load_profile.json) | Load profile and service objectives for the report. |
+| [**scripts/load_test.py**](scripts/load_test.py) | Load probe for latency and error-rate checks. |
 | [**solution**](solution/README.md) | Runnable reference scaffold and tests. Inspect after attempting the project. |
-| [**Assets**](assets/README.md) | Visual sources and credits. |
 | [**.env.example**](.env.example) | Default settings and credential placeholders. |
 | [**pyproject.toml**](pyproject.toml) | Project configuration and dependencies. |
 | [**uv.lock**](uv.lock) | Dependency lock file. |
 
 ## Prerequisites
 
-Start Docker Desktop or a compatible Docker Engine before the container
-milestone. Use an approved Render setup for the hosted milestone. Hosted
-resources and live model calls can incur charges.
+- **Docker Desktop**: required to build the API image and run the container in milestone 1. Follow the [installation instructions](https://docs.docker.com/get-docker/) if you do not have it yet. Make sure it is **installed and running** before you start milestone 1.
+
+- **Render account**: required to deploy the service in milestone 2. [Sign up](https://dashboard.render.com/register) for free with your GitHub account.
 
 > [!NOTE]
-> **Windows Users:** The examples use Bash syntax. Run them in Git Bash.
+> **Windows Users:** The commands in this repository use bash syntax. Use **Git Bash** (installed with [Git for Windows](https://git-scm.com/downloads/win)) instead of PowerShell to run them.
 
 ## Setup
 
@@ -113,62 +113,57 @@ The command below installs all dependencies and creates a virtual environment in
 
 ```bash
 cd <repo-name>
-uv sync --locked
+uv sync
 ```
 
 ---
 
 ### 5. Set Up Environment Variables
 
+Copy the provider, service, and tracing settings:
+
 ```bash
-test -f .env || cp .env.example .env
+cp .env.example .env
 ```
 
-Start with a stub and local trace output to check your own API. The supplied
-reference uses `MODEL_PROVIDER=dry` and `TRACE_SINK=jsonl` for that path.
-For a live run, use the matching provider, model and credentials from
+Start with an offline run and local trace output to check your own API. For
+that path, set `MODEL_PROVIDER=dry` in `.env` (the copied file defaults to
+`groq`, which needs a key). `TRACE_SINK=jsonl` is already set. For a live
+run, use the matching provider, model, and credentials from
 [`.env.example`](.env.example).
 
 > [!CAUTION]
-> Never commit `.env` or real credentials.
+> Never commit `.env`. It is git-ignored because environment files often hold secrets. Only `.env.example`, with placeholder or default values, belongs in the repository.
 
 ---
 
 ### 6. Open the Repository in VS Code
 
+> [!NOTE]
+> Make sure you open VS Code from the project root so it automatically detects the environment created by `uv sync`.
+
+Launch VS Code in the project root folder:
+
 ```bash
 code .
 ```
 
-Select the Python interpreter in `.venv/` and run commands from the repository root.
+Select the Python interpreter in `.venv/` created by `uv sync`. Run the [reference solution commands](solution/README.md#run-the-offline-evaluation) from the project root.
 
 ## Required Deliverables
 
-Read the [required implementation](project-description.md#required-implementation)
-and agree on the API contract before choosing a provider. Then follow the
-[three milestones](project-description.md#suggested-milestones) and use the
-[acceptance checklist](project-description.md#minimum-acceptance-checklist)
-before submitting.
+Your repository must include:
 
-Submit the tested inference API, Dockerfile and Render Blueprint,
-cache and capacity controls, Langfuse observations and answer-quality
-evaluation. In `reports/deployment_report.md`, compare functional and load
-results with the supplied objectives and justify a deployment recommendation.
-
-Keep the shared inputs, labels, and thresholds unchanged. To inspect the
-load profile:
-
-```bash
-uv run --locked python -m json.tool data/operations/load_profile.json
-```
-
-Expect 40 requests at concurrency 5, with separate latency, error-rate, and
-quality objectives. This only reads the workload definition; it does not
-send requests or produce an evaluation result.
-
-After attempting the project, use the [reference walkthrough](solution/README.md)
-to compare your API and evaluation evidence. The reference is a scaffold,
-not a completed submission.
+- a typed inference API with health, readiness, and generation routes behind a
+  replaceable provider interface,
+- cache and capacity controls: a parameter-aware cache key, TTL, bounded
+  concurrency, and timeouts,
+- a Dockerfile that runs the same service locally and as a Render web service,
+- Langfuse observations with nested stages, token usage, cost, latency, and a
+  quality score,
+- tests covering valid requests, invalid input, and upstream failures,
+- `reports/deployment_report.md` comparing functional and load results with the
+  supplied objectives and justifying a deployment recommendation.
 
 ## References & Further Reading
 
