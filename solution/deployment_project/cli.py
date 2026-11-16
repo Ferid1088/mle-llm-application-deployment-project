@@ -25,6 +25,7 @@ def main() -> None:
         return
 
     report = render_report(run_evaluation())
-    path = ROOT / "solution" / "reports" / "reference_evaluation.md"
+    path = ROOT / "reports" / "generated" / "evaluation.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(report)
     print(f"Wrote {path}")

@@ -21,5 +21,6 @@ def test_repeated_request_hits_cache_and_writes_complete_trace(tmp_path: Path) -
 
     assert first.cache_hit is False
     assert second.cache_hit is True
-    assert traces[-1]["spans"] == ["cache-lookup", "llm-generation"]
+    assert traces[-1]["spans"] == ["cache-lookup"]
+    assert traces[-1]["usage"] == {"input_tokens": 0, "output_tokens": 0}
     assert traces[-1]["quality_score"] >= 0.8
