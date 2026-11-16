@@ -126,6 +126,9 @@ observation delivery separately from the HTTP response; a 200 does not prove
 that telemetry arrived. Show one failure trace without counting it as an
 answer-quality sample.
 
+**Bonus:** build a Langfuse dashboard with latency, cost, and answer-quality
+widgets for your service.
+
 **Checkpoint:** demonstrate a working hosted route and a correlated
 observation tree without exposing credentials or raw customer text. State
 what remains unverified if a live provider or cloud export was unavailable.

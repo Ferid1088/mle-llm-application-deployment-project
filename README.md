@@ -54,6 +54,8 @@ flowchart LR
 
 - **Render account**: required to deploy the service in milestone 2. [Sign up](https://dashboard.render.com/register) for free with your GitHub account.
 
+- **Langfuse account**: required to record and inspect traces in milestone 2. [Sign up](https://cloud.langfuse.com) for the free Hobby plan (no credit card required) and create a project used only for this exercise.
+
 > [!NOTE]
 > **Windows Users:** The commands in this repository use bash syntax. Use **Git Bash** (installed with [Git for Windows](https://git-scm.com/downloads/win)) instead of PowerShell to run them.
 

@@ -22,4 +22,5 @@ Bonus:
 
 - [ ] I ran the service with a live LLM provider in addition to the offline dry provider.
 - [ ] I created a `render.yaml` reference Blueprint that documents my Render web service settings.
+- [ ] I built a Langfuse dashboard with latency, cost, and answer-quality widgets for my service.
 - [ ] I documented any disagreements with the evaluation labels in the report.
