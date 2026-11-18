@@ -4,7 +4,10 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from groq import APITimeoutError
 from httpx import TimeoutException
 
@@ -14,6 +17,8 @@ from solution.deployment_project.provider import build_provider
 from solution.deployment_project.service import GenerationService
 
 logger = logging.getLogger(__name__)
+
+STATIC_DIR = Path(__file__).parent / "static"
 
 service = GenerationService(build_provider(settings), settings)
 
@@ -27,6 +32,11 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Northstar LLM Deployment Project", lifespan=lifespan)
+
+
+@app.get("/", include_in_schema=False)
+def index() -> FileResponse:
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 @app.get("/health")
